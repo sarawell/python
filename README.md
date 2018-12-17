@@ -14,3 +14,7 @@
 
 
   test in 2018/12/07
+
+
+  test in xiaomi desktop
+  
