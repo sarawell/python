@@ -18,6 +18,7 @@ class AnalysisAuthor:
     title_href=[]
     url_header="https://www.jianshu.com/"
     def __init__(self,url):
+        self.url_short=url
         self.url=self.url_header+"/u/"+url
         self.headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
         self.page = request.Request(self.url,headers=self.headers)
@@ -39,7 +40,7 @@ class AnalysisAuthor:
     def GetFollowing(self):
         self.page=2
         self.flist=[]
-        self.url_following=self.url_header+"users/"+url+"/following"
+        self.url_following=self.url_header+"users/"+self.url_short+"/following"
         #print(self.url_following)
         self.page_following=request.Request(self.url_following,headers=self.headers)
         self.page_info_following=request.urlopen(self.page_following).read().decode('utf-8')
@@ -68,9 +69,9 @@ class AnalysisAuthor:
             #self.following_name.append(self.flist)
             self.page=self.page+1
 
-        self.num=self.following_name.count(url)
+        self.num=self.following_name.count(self.url_short)
         for self.temp in range(0,self.num):
-            self.following_name.remove(url)
+            self.following_name.remove(self.url_short)
 
         return self.following_name
     
@@ -100,9 +101,9 @@ class AnalysisAuthor:
             self.follower_page=self.follower_page+1
             time.sleep(3)
 
-        self.num_follower=self.follower_name.count(url)
+        self.num_follower=self.follower_name.count(self.url_short)
         for self.temp in range(0,self.num_follower):
-            self.follower_name.remove(url)
+            self.follower_name.remove(self.url_short)
             
         return self.follower_name
 
@@ -116,7 +117,7 @@ class AnalysisAuthor:
             self.title_href.append(self.ti.get('href')[3:len(self.ti.get('href'))])
         while(len(self.tilist)>8):
             self.tilist.clear()
-            self.t_url=self.url_header+"/u/"+url+"?order_by=shared_at&page="+str(self.t_page_num)
+            self.t_url=self.url_header+"/u/"+self.url_short+"?order_by=shared_at&page="+str(self.t_page_num)
             print(self.t_url)
             self.t_page=request.Request(self.t_url,headers=self.headers)
             self.page_info_t=request.urlopen(self.t_page).read().decode('utf-8')
@@ -185,13 +186,40 @@ class GetTitleinfo:
 
         
       
+class initJianshu:
+    def __init__(self):
+        self.url="https://www.jianshu.com"
+        self.headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
+        self.page = request.Request(self.url,headers=self.headers)
+        self.page_info = request.urlopen(self.page).read().decode('utf-8')
+        self.soup = BeautifulSoup(self.page_info, 'html.parser')
+        self.authors=self.soup.find_all('a','nickname')
+        for self.author in self.authors:
+            #print(self.author.get('href')[3:len(self.author.get('href'))])
+            author_list.append(self.author.get('href')[3:len(self.author.get('href'))])
+        
 
 
 
 
 
-
-#mian
+#main
+db_path='/home/j/python/python/test.db'
+conn=sqlite3.connect(db_path)
+c=conn.cursor()
+author_list=[]
+title_list=[]
+initJianshu()
+#print(len(author_list))
+if(len(author_list)>0):
+    url=author_list.pop(0)
+    print("analysis:"+url+"\n")
+    sql="s"
+    result=c.execute('SELECT ')
+    a_url=AnalysisAuthor(url)
+    print(a_url.GetName())
+    print(a_url.GetAuthorInfo())
+    c.execute('INSERT INTO test1 VALUES (?,?)',(author.string,aaa))
 
 
 
