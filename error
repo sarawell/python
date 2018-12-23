@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "analysisJianShu.py", line 266, in <module>
+    c.execute('INSERT INTO title VALUES (?,?,?,?,?,?,?)',(title_url,t_url.GEtAuthorName(),t_url.GetPubilc_time(),t_url.Getwordage(),t_url.GetViewcount(),t_url.GetCommondcount(),t_url.GetLikecount()))
+  File "analysisJianShu.py", line 205, in GEtAuthorName
+    self.getname=self.selector.xpath("//a[@class='avatar']")
+AttributeError: 'GetTitleinfo' object has no attribute 'selector'
+
+
+  File "analysisJianShu.py", line 266, in <module>
+    c.execute('INSERT INTO title VALUES (?,?,?,?,?,?,?)',(title_url,t_url.GEtAuthorName(),t_url.GetPubilc_time(),t_url.Getwordage(),t_url.GetViewcount(),t_url.GetCommondcount(),t_url.GetLikecount()))
+  File "analysisJianShu.py", line 205, in GEtAuthorName
+    self.getname=self.selector.xpath("//a[@class='avatar']")
+AttributeError: 'GetTitleinfo' object has no attribute 'selector'
+
+
+  File "analysisJianShu.py", line 263, in <module>
+    t_url=GetTitleinfo(title_url)
+  File "analysisJianShu.py", line 175, in __init__
+    self.author_json=json.loads(self.test[0].text)
+IndexError: list index out of range
