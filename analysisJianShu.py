@@ -8,6 +8,8 @@ import sqlite3
 from lxml import etree
 import json
 import datetime
+import threading
+import queue
 #from lxml.etree import HTMLParser
 
 
@@ -23,7 +25,7 @@ class AnalysisAuthor:
         self.following_name.clear()
         self.title_href.clear()
         self.url_short=url
-        self.url=self.url_header+"/u/"+url
+        self.url=self.url_header+"/u/"+self.url_short
         self.headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
         self.page = request.Request(self.url,headers=self.headers)
         #time.sleep(1)
@@ -91,7 +93,7 @@ class AnalysisAuthor:
     def GetFollower(self):
         self.follower_page=2
         self.fslist=[]
-        self.follower_url=self.url_header+"users/"+url+"/followers"
+        self.follower_url=self.url_header+"users/"+self.url_short+"/followers"
         self.page_follower=request.Request(self.follower_url,headers=self.headers)
         #time.sleep(1)
         self.page_info_follower=request.urlopen(self.page_follower).read().decode('utf-8')
@@ -246,9 +248,65 @@ author_list=[]
 title_list=[]
 initJianshu()
 
+threadnum=10
+threads=[]
+bq=queue.Queue()
+
+def InsterToDB(bq):
+    t_db_path='/home/j/python/python/test.db'
+    t_conn=sqlite3.connect(t_db_path)
+    t_c=t_conn.cursor()
+    while(1):
+        if(bq.empty()):
+            time.sleep(1)
+            continue
+        temp=bq.get()
+        print("insert: "+temp[1]+"to DB")
+        t_c.execute('INSERT INTO author1 VALUES (?,?,?,?,?,?,?)',(temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6]))
+        t_conn.commit()
+
+
+def Tgettile(title_url):    
+    try:
+        t_url=AnalysisAuthor(title_url)
+        tinfo=[title_url,t_url.GetName(),int(t_url.GetAuthorInfo()[0]),int(t_url.GetAuthorInfo()[1]),int(t_url.GetAuthorInfo()[2]),int(t_url.GetAuthorInfo()[3]),int(t_url.GetAuthorInfo()[4])]
+        bq.put(tinfo)
+        print("insert: "+title_url+"to queue")
+        if(len(author_list)<100):
+            author_list.extend(t_url.GetFollower())
+            author_list.extend(t_url.GetFollowing())
+    except :
+        return
+
+t_insert=threading.Thread(target=InsterToDB,args=(bq,))
+t_insert.start()
+db_path='/home/j/python/python/test.db'
+conn=sqlite3.connect(db_path)
+c=conn.cursor()
+while(len(author_list)>0):
+    threads=[]
+    if(len(author_list)>10):
+        threadnum=10
+    else:
+        threadnum=len(author_list)
+    for i in range(0,threadnum):
+        url=author_list.pop(0)
+        c.execute('SELECT * FROM author1 WHERE url=?',[url])
+        result=c.fetchone()
+        #print(type(c.fetchall()))
+        if(result!=None):
+            continue
+        t=threading.Thread(target=Tgettile,args=(url,))
+        threads.append(t)
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    
+
 
 #print(len(author_list))
-while(len(author_list)>0):
+""" while(len(author_list)>0):
     url=author_list.pop(0)
     #print(type(url))
     print("analysis:"+url+"\n")
@@ -284,7 +342,7 @@ while(len(author_list)>0):
             continue
         
         
-
+ """
 
 """ url="74b0e0bfe47a"
 aaa=GetTitleinfo(url)

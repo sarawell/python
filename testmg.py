@@ -117,7 +117,7 @@ class AnalysisAuthor:
                         if(self.temp!=self.url):
                             if(self.following_list.count(self.temp)==0):
                                 self.following_list.append(self.temp)
-                                if(len(author_queue)<200):
+                                if(len(author_queue)<20):
                                     author_queue.append(self.temp)
                             else:
                                 pass
@@ -154,12 +154,9 @@ class AnalysisAuthor:
                         if(self.fwer_temp!=self.url):
                             if(self.follower_list.count(self.fwer_temp)==0):
                                 self.follower_list.append(self.fwer_temp)
-                                if(len(author_queue)<200):
+                                if(len(author_queue)<20):
                                     author_queue.append(self.fwer_temp)
-                            else:
-                                pass
-                else:
-                    pass
+                            
                 self.follower_page_num=self.follower_page_num+1
                 if(self.follower_page_num>self.follower_page_count):
                     return self.follower_list
@@ -197,7 +194,7 @@ class AnalysisAuthor:
             return None
         
     
-def GetAuthor(url):
+""" def GetAuthor(url):
     try:
         insertstring={"name":"","url":"","following":"","follower":"","title":"","wordages":"","likecount":""}
         a=AnalysisAuthor(url)
@@ -211,17 +208,10 @@ def GetAuthor(url):
         insertstring['title']=a.a_author_title
         insertstring['wordages']=a.a_author_wordages
         insertstring['likecount']=a.a_author_likescount
+        return insertstring
         #insert_queue.put(insertstring)
-        time.sleep(1)
-        print("put: "+a.a_author_name+" to queue")
-        myclient =MongoClient("mongodb://localhost:27017/")
-        dblists = myclient.test
-        my_set=dblists.admin
-        my_set.insert(insertstring)
-        time.sleep(2)
-        print("insert: "+insertstring['name']+"to moangodb")
     except :
-        return
+        return None """
 
 
 def insertDB(insert_queue):
@@ -238,96 +228,13 @@ def insertDB(insert_queue):
         time.sleep(1)
 
 
-initJianshu()
-#insertT=threading.Thread(target=insertDB,args=(insert_queue,))
-#insertT.start()
-mclient =MongoClient("mongodb://localhost:27017/")
-db_lists = mclient.test
-# dblist = myclient.database_names() 
-m_set=db_lists.admin
-while (len(author_queue)):
-    a_url=author_queue.pop(0)
-    a=m_set.find({'url':a_url})
-    if(a.count()):
-        continue
-    GetAuthor(a_url)
-    """ threads=[]
-    if(len(author_queue)>10):
-        threadNum=1
-    else:
-        threadNum=1
-    for i in range(0,threadNum):
-        a_url=author_queue.pop(0)
-        a=m_set.find({'url':a_url})
-        if(a.count()):
-            continue
-        t=threading.Thread(target=GetAuthor,args=(a_url,))
-        threads.append(t)
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()  """
-
-
-# initJianshu()
-""" url='015e4ff07fe8'
-GetAuthor(url) """
-
-
-
-""" while(len(author_queue)):
-    url='cfbadf46f67d'
-    #url=author_queue.pop(0)
-    insertstring={"name":"","url":"","following":"","follower":"","title":"","wordages":"","likecount":""}
-    a=AnalysisAuthor(url)
-    a.GetInfo()
-    insertstring['name']=a.a_author_name
-    insertstring['url']=url
-    followerlist=a.GetFollower()
-    insertstring['follower']={'count':a.a_author_follower,'detal':followerlist}
-    followinglist=a.GetFollowing()
-    insertstring['following']={'count':a.a_author_following,'detal':followinglist}
-    insertstring['title']=a.a_author_title
-    insertstring['wordages']=a.a_author_wordages
-    insertstring['likecount']=a.a_author_likescount
-    insert_queue.put(insertstring)
-    print("put: "+a.a_author_name+" to queue") """
-
-""" insertT=threading.Thread(target=insertDB,args=(insert_queue,))
-insertT.start()
-mclient =MongoClient("mongodb://localhost:27017/")
-db_lists = mclient.test
-# dblist = myclient.database_names() 
-m_set=db_lists.admin
-
-while (len(author_queue)):
-    threads=[]
-    if(len(author_queue)>10):
-        threadNum=10
-    else:
-        threadNum=len(author_queue)
-    for i in range(0,threadNum):
-        a_url=author_queue.pop(0)
-        a=m_set.find({'url':a_url})
-        if(a.count()):
-            continue
-        t=threading.Thread(target=GetAuthor,args=(a_url,))
-        threads.append(t)
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join() """
-
-
-
-""" url='bd492042f56a'
-followerlist=[]
+#initJianshu()
+url='db8c0c1c4c99'
+insertstring={"name":"","url":"","following":"","follower":"","title":"","wordages":"","likecount":""}
 a=AnalysisAuthor(url)
 a.GetInfo()
-print(insertstring)
 insertstring['name']=a.a_author_name
 insertstring['url']=url
-
 followerlist=a.GetFollower()
 insertstring['follower']={'count':a.a_author_follower,'detal':followerlist}
 followinglist=a.GetFollowing()
@@ -335,25 +242,5 @@ insertstring['following']={'count':a.a_author_following,'detal':followinglist}
 insertstring['title']=a.a_author_title
 insertstring['wordages']=a.a_author_wordages
 insertstring['likecount']=a.a_author_likescount
-print(insertstring)
-#a.GetTitles()
-#a.GetFollowing()
-#a.GetFollower()
-print('ok') """
 
-""" i=random.choice(user_agent_pools)
-print("user-Agent: "+i)
-
-url='https://www.jianshu.com/u/a4356349e36d'
-header={'User-Agent':i}
-page=request.Request(url,headers=header)
-#page_info = request.urlopen(page)
-try:
-    page_info = request.urlopen(page)
-except error.HTTPError as e:
-    print("error.HTTPError")
-page_info = request.urlopen(page)
-if(page_info.code==200):
-    print("111")
-print(page_info) """
 
